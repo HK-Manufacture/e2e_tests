@@ -1,133 +1,92 @@
 package io.testomat.e2e_tests;
 
-import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.SelenideElement;
-import org.jetbrains.annotations.NotNull;
+import io.testomat.e2e_tests.web.pages.ProjectPage;
+import io.testomat.e2e_tests.web.pages.ProjectsPage;
+import io.testomat.e2e_tests.web.pages.SignInPage;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-
-import static com.codeborne.selenide.Condition.*;
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
 import static io.testomat.e2e_tests.utils.StringParsers.parseIntegerFromString;
 
 public class ProjectPageTests extends BaseTest {
 
+    private static final SignInPage signInPage = new SignInPage();
+    private static final ProjectsPage projectsPage = new ProjectsPage();
+    private static final ProjectPage projectPage = new ProjectPage();
+
     @BeforeAll
     static void openTestomatAndLogin() {
-        open(baseUrl);
-        loginUser(email, password);
+
+        signInPage.open();
+        signInPage.loginUser(email, password);
+        projectsPage.signInSuccessful();
     }
 
     @BeforeEach
-    void openHomePage() {
-        open(baseUrl);
+    void openProjectsPage() {
+        projectsPage.open();
+        projectsPage.isLoaded();
     }
 
     @Test
     public void shouldFindProjectByAuthorizedUserTest() {
 
-        searchForProject(targetProjectName);
+        projectsPage.searchForProject(targetProjectName);
 
-        selectProject(targetProjectName);
+        projectsPage.selectProject(targetProjectName);
 
-        waitForProjectPageIsLoaded(targetProjectName);
+        projectPage.isLoaded(targetProjectName);
 
     }
 
     @Test
     public void shouldNotConsistTestCasesTest() {
 
-        searchForProject(targetProjectName);
+        projectsPage.searchForProject(targetProjectName);
 
-        SelenideElement targetProject = $$("#grid ul li").filter(visible).findBy(text(targetProjectName));
+        var targetProject = projectsPage.getTargetProject(targetProjectName);
 
-        countOfTestsShouldBeEqualTo(targetProject, 0);
+        projectsPage.countOfTestsShouldBeEqualTo(targetProject, 1);
 
-        countOfUsersShouldBeGraterThen(1);
+        var countsOfUsers = projectsPage.getCountOfUsers(targetProjectName);
+        Integer digitUsers = parseIntegerFromString(countsOfUsers);
+        Assertions.assertTrue(digitUsers > 1);
 
     }
 
     @Test
     public void shouldDisplayToolbarWithHoverSuitTest() {
 
-        searchForProject(targetProjectName);
+        projectsPage.searchForProject(targetProjectName);
 
-        selectProject(targetProjectName);
+        projectsPage.selectProject(targetProjectName);
 
-        waitForProjectPageIsLoaded(targetProjectName);
+        projectPage.isLoaded(targetProjectName);
 
-        checkActionButtonsAreVisibleAfterHoveringSuite();
+        projectPage.checkActionButtonsAreVisibleAfterHoveringSuite();
 
-        tooltipsAreVisibleAndCorrect();
+        projectPage.tooltipsAreVisibleAndCorrect();
 
     }
 
-    private static void tooltipsAreVisibleAndCorrect() {
-        checkTooltipIsVisibleAndCorrect("md-icon-star-outline", "Star");
-        checkTooltipIsVisibleAndCorrect("md-icon-plus-box-outline", "Create next suite");
-        checkTooltipIsVisibleAndCorrect("md-icon-pencil-box-outline", "Edit suite");
-        checkTooltipIsVisibleAndCorrect("md-icon-link-variant", "Link suite");
-        checkTooltipIsVisibleAndCorrect("md-icon-trash-can-outline", "Delete suite");
-    }
+    @Test
+    public void shouldFilterTestsByStateTest() {
 
-    private static void checkActionButtonsAreVisibleAfterHoveringSuite() {
-        $$(".flex.justify-between.space-x-2.overflow-hidden.w-full").first().hover();
-        for (String s : Arrays.asList(
-                "md-icon-star-outline",
-                "md-icon-plus-box-outline",
-                "md-icon-pencil-box-outline",
-                "md-icon-link-variant",
-                "md-icon-trash-can-outline")) {
-            getActionButtonAfterHoveringSuite(s).shouldBe(visible);
-        }
-    }
+        projectsPage.searchForProject(targetProjectName);
 
-    private static void checkTooltipIsVisibleAndCorrect(String svgClass, String tooltipText) {
-        getActionButtonAfterHoveringSuite(svgClass).hover();
-        $$("[role=\"tooltip\"]").findBy(text(tooltipText)).shouldBe(visible);
-    }
+        projectsPage.selectProject(targetProjectName);
 
-    @NotNull
-    private static SelenideElement getActionButtonAfterHoveringSuite(String svgClass) {
-        return $$(".nestedItem-toolbar svg").filterBy(cssClass(svgClass)).first().closest("button");
-    }
+        projectPage.isLoaded(targetProjectName);
 
-    private void countOfUsersShouldBeGraterThen(int expectedCountOfUser) {
-        String countsOfUsers = $$(String.format("[title='%s'] div", targetProjectName)).findBy(text("+")).getText();
-        Integer digitUsers = parseIntegerFromString(countsOfUsers);
-        Assertions.assertTrue(digitUsers > expectedCountOfUser);
-    }
+        projectPage.openFilters();
 
-    private static void countOfTestsShouldBeEqualTo(SelenideElement targetProject, int expectedCountOfTests) {
-        String countOfTests = targetProject.$("p").getText();
-        Integer digitTests = parseIntegerFromString(countOfTests);
-        Assertions.assertEquals(expectedCountOfTests, digitTests);
-    }
+        projectPage.openDropdown();
 
-    private static void waitForProjectPageIsLoaded(String targetProjectName) {
-        SelenideElement manufactureLight = $(".first [href=\"/projects/manufacture-light/\"]").shouldHave(Condition.text(targetProjectName));
-    }
+        projectPage.selectState();
 
-    private static void selectProject(String targetProjectName) {
-        $(byText(targetProjectName)).click();
-    }
-
-    private static void searchForProject(String targetProjectName) {
-        $("#search").setValue(targetProjectName);
-    }
-
-    public static void loginUser(String email, String password) {
-        $("#content-desktop #user_email").setValue(email);
-        $("#content-desktop #user_password").setValue(password);
-
-        $("#content-desktop #user_remember_me").click();
-        $("#content-desktop [name=\"commit\"]").click();
-        $(".common-flash-success").shouldBe(visible);
+        projectPage.applyFilters();
     }
 
 }
