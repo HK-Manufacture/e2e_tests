@@ -18,6 +18,10 @@ dependencies {
     implementation("io.github.cdimascio:java-dotenv:5.2.2")
 }
 
+dependencies {
+    testImplementation ("org.slf4j:slf4j-simple:2.0.9")
+}
+
 
 tasks.test {
     useJUnitPlatform()
