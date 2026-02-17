@@ -1,13 +1,16 @@
 package io.testomat.e2e_tests.web.pages;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selectors;
 import com.codeborne.selenide.SelenideElement;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
 
-import static com.codeborne.selenide.Condition.*;
+import static com.codeborne.selenide.Condition.text;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$;
 import static com.codeborne.selenide.Selenide.$$;
 
@@ -15,40 +18,40 @@ public class ProjectPage {
 
     public ProjectPage isLoaded(String targetProjectName) {
         $(".first [href='/projects/manufacture-light/']").shouldHave(Condition.text(targetProjectName));
-        return  this;
+        return this;
     }
 
-    /*private static final List<String> ACTION_BUTTON_ICONS = Arrays.asList(
-            "md-icon-star-outline",
-            "md-icon-plus-box-outline",
-            "md-icon-pencil-box-outline",
-            "md-icon-link-variant",
-            "md-icon-trash-can-outline"
+    private static final List<String> TOOLTIP_TEXTS = Arrays.asList(
+            "Star",
+            "Create next suite",
+            "Edit suite",
+            "Link suite",
+            "Delete suite"
     );
 
-    public void tooltipsAreVisibleAndCorrect() {
-        checkTooltipIsVisibleAndCorrect("md-icon-star-outline", "Star");
-        checkTooltipIsVisibleAndCorrect("md-icon-plus-box-outline", "Create next suite");
-        checkTooltipIsVisibleAndCorrect("md-icon-pencil-box-outline", "Edit suite");
-        checkTooltipIsVisibleAndCorrect("md-icon-link-variant", "Link suite");
-        checkTooltipIsVisibleAndCorrect("md-icon-trash-can-outline", "Delete suite");
+    @NotNull
+    private SelenideElement getFirstSuite() {
+        return $$(".nestedItem.sort-list-empty").first().hover();
+
     }
 
     public void checkActionButtonsAreVisibleAfterHoveringSuite() {
-        $$(".flex.justify-between.space-x-2.overflow-hidden.w-full").first().hover();
-        for (String stileItem : ACTION_BUTTON_ICONS) {
-            getActionButtonAfterHoveringSuite(stileItem).shouldBe(visible);
+        getFirstSuite().$$(".nestedItem-toolbar button").forEach(button ->
+                button.shouldBe(visible)
+        );
+    }
+
+    public void tooltipsAreVisibleAndCorrect() {
+        ElementsCollection actionButtons = getFirstSuite().$$(".nestedItem-toolbar button");
+
+        for (int i = 0; i < TOOLTIP_TEXTS.size(); i++) {
+            actionButtons.get(i).hover();
+            $$("[role=tooltip]")
+                    .findBy(text(TOOLTIP_TEXTS.get(i)))
+                    .shouldBe(visible);
         }
-    }
 
-    private static void checkTooltipIsVisibleAndCorrect(String svgClass, String tooltipText) {
-        getActionButtonAfterHoveringSuite(svgClass).hover();
-        $$("[role=tooltip]").findBy(text(tooltipText)).shouldBe(visible);
     }
-
-    private static SelenideElement getActionButtonAfterHoveringSuite(String svgClass) {
-        return $$(".nestedItem-toolbar svg").filterBy(cssClass(svgClass)).first().closest("button");
-    }*/
 
     public void openFilters() {
         $(".filterbar-filter-btn-div button").click();
@@ -69,13 +72,13 @@ public class ProjectPage {
         $$(".filterbar-v2-results span").first().shouldBe(visible);
     }
 
-    public ProjectPage openReadme () {
+    public ProjectPage openReadme() {
         $$(".ember-basic-dropdown [role=button]").last().click();
         $(Selectors.byLinkText("Readme")).click();
         return this;
     }
 
-    public ProjectPage clickOnEdit () {
+    public ProjectPage clickOnEdit() {
         $(Selectors.byLinkText("Edit")).click();
         return this;
     }

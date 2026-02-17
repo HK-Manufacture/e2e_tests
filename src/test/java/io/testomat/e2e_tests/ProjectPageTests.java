@@ -40,21 +40,21 @@ public class ProjectPageTests extends BaseTest {
 
     }
 
-    /*@Test
+    @Test
     public void shouldDisplayToolbarWithHoverSuitTest() {
 
-        projectsPage.searchForProject(targetProjectName);
+        app.projectsPage.searchForProject(targetProjectName);
 
-        projectsPage.selectProject(targetProjectName);
+        app.projectsPage.selectProject(targetProjectName);
 
-        projectPage.isLoaded(targetProjectName);
+        app.projectPage.isLoaded(targetProjectName);
 
-        projectPage.checkActionButtonsAreVisibleAfterHoveringSuite();
+        app.projectPage.checkActionButtonsAreVisibleAfterHoveringSuite();
 
-        projectPage.tooltipsAreVisibleAndCorrect();
+        app.projectPage.tooltipsAreVisibleAndCorrect();
 
     }
-    */
+
 
     @Test
     public void shouldFilterTestsByStateTest() {
